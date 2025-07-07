@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمون روانشناسی شخصیت | طراحی آیدا رضائی</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;200;300;400;500;600;700;800;900&display=swap');
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .question-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .question-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .option-item {
+            transition: all 0.2s ease;
+        }
+        
+        .option-item:hover {
+            background-color: #e9ecef;
+        }
+        
+        .progress-bar {
+            transition: width 0.6s ease;
+        }
+        
+        .result-card {
+            animation: fadeIn 0.8s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-indigo-800 mb-2">آزمون روانشناسی شخصیت</h1>
+            <p class="text-gray-600">این آزمون به شما کمک می‌کند تا جنبه‌های مختلف شخصیت خود را بهتر بشناسید</p>
+        </header>
+        
+        <!-- Test Container -->
+        <div id="test-container">
+            <!-- Progress Bar -->
+            <div class="bg-gray-200 rounded-full h-4 mb-8">
+                <div id="progress-bar" class="progress-bar bg-indigo-600 h-4 rounded-full" style="width: 0%"></div>
+            </div>
+            
+            <!-- Question Container -->
+            <div id="question-container" class="space-y-8">
+                <!-- Questions will be dynamically inserted here -->
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between mt-12">
+                <button id="prev-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-6 rounded-lg hidden">
+                    <i class="fas fa-arrow-right ml-2"></i> سوال قبلی
+                </button>
+                <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg">
+                    سوال بعدی <i class="fas fa-arrow-left mr-2"></i>
+                </button>
+                <button id="submit-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg hidden">
+                    مشاهده نتیجه <i class="fas fa-chart-bar mr-2"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Results Container (Hidden Initially) -->
+        <div id="results-container" class="hidden">
+            <div class="result-card bg-white rounded-xl shadow-lg p-8 text-center">
+                <div class="mb-6">
+                    <i class="fas fa-star text-yellow-400 text-5xl mb-4"></i>
+                    <h2 class="text-2xl font-bold text-indigo-800 mb-2">نتیجه آزمون شما</h2>
+                    <p class="text-gray-600">بر اساس پاسخ‌های شما به سوالات</p>
+                </div>
+                
+                <div id="result-content" class="mb-8">
+                    <!-- Result will be dynamically inserted here -->
+                </div>
+                
+                <div class="border-t pt-6">
+                    <p class="text-gray-500 text-sm">طراحی و توسعه: <span class="font-bold text-indigo-600">آیدا رضائی</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test Questions
+        const questions = [
+            {
+                id: 1,
+                text: "در یک مهمانی، معمولاً چگونه رفتار می‌کنید؟",
+                options: [
+                    { text: "با همه حاضرین صحبت می‌کنم و مرکز توجه هستم", score: "E" },
+                    { text: "با چند نفر که می‌شناسم صحبت می‌کنم", score: "A" },
+                    { text: "ترجیح می‌دهم گوشه‌ای آرام بایستم و دیگران را مشاهده کنم", score: "I" },
+                    { text: "سعی می‌کنم زودتر از مهمانی خارج شوم", score: "S" }
+                ]
+            },
+            {
+                id: 2,
+                text: "وقتی با مشکلی مواجه می‌شوید، معمولاً چه واکنشی نشان می‌دهید؟",
+                options: [
+                    { text: "بلافاصله راه‌حل‌های مختلف را بررسی می‌کنم", score: "T" },
+                    { text: "احساساتم را بررسی می‌کنم و سپس تصمیم می‌گیرم", score: "F" },
+                    { text: "از دیگران کمک می‌خواهم", score: "D" },
+                    { text: "سعی می‌کنم از مشکل فرار کنم", score: "A" }
+                ]
+            },
+            {
+                id: 3,
+                text: "در برنامه‌ریزی برای آینده، معمولاً:",
+                options: [
+                    { text: "برنامه‌های دقیق و گام به گام می‌چینم", score: "J" },
+                    { text: "ترجیح می‌دهم انعطاف‌پذیر باشم و در لحظه تصمیم بگیرم", score: "P" },
+                    { text: "هم برنامه دارم هم انعطاف‌پذیر هستم", score: "B" },
+                    { text: "اصلاً برنامه‌ریزی نمی‌کنم", score: "S" }
+                ]
+            },
+            {
+                id: 4,
+                text: "در مواجهه با تغییرات ناگهانی در زندگی:",
+                options: [
+                    { text: "به راحتی خود را وفق می‌دهم", score: "A" },
+                    { text: "ابتدا استرس می‌گیرم اما سپس سازگار می‌شوم", score: "B" },
+                    { text: "برایم بسیار سخت است", score: "C" },
+                    { text: "بستگی به نوع تغییر دارد", score: "D" }
+                ]
+            },
+            {
+                id: 5,
+                text: "وقتی کسی با شما مخالفت می‌کند:",
+                options: [
+                    { text: "سعی می‌کنم او را متقاعد کنم", score: "E" },
+                    { text: "بحث را ادامه می‌دهم تا به نتیجه برسم", score: "T" },
+                    { text: "سعی می‌کنم از بحث دوری کنم", score: "F" },
+                    { text: "احساساتم جریحه‌دار می‌شود", score: "S" }
+                ]
+            },
+            {
+                id: 6,
+                text: "در اوقات فراغت ترجیح می‌دهید:",
+                options: [
+                    { text: "با دوستان وقت بگذرانید", score: "E" },
+                    { text: "کتاب بخوانید یا فیلم تماشا کنید", score: "I" },
+                    { text: "به فعالیت‌های خلاقانه بپردازید", score: "C" },
+                    { text: "استراحت کنید و کاری نکنید", score: "S" }
+                ]
+            },
+            {
+                id: 7,
+                text: "وقتی پروژه جدیدی شروع می‌کنید:",
+                options: [
+                    { text: "ابتدا تمام جزئیات را برنامه‌ریزی می‌کنم", score: "J" },
+                    { text: "شروع می‌کنم و در طول راه جزئیات را مشخص می‌کنم", score: "P" },
+                    { text: "از دیگران کمک می‌خواهم", score: "D" },
+                    { text: "تا دقیقه آخر صبر می‌کنم", score: "S" }
+                ]
+            },
+            {
+                id: 8,
+                text: "در تصمیم‌گیری‌های مهم زندگی:",
+                options: [
+                    { text: "بیشتر به منطق تکیه می‌کنم", score: "T" },
+                    { text: "بیشتر به احساساتم تکیه می‌کنم", score: "F" },
+                    { text: "سعی می‌کنم بین این دو تعادل برقرار کنم", score: "B" },
+                    { text: "از دیگران مشورت می‌گیرم", score: "D" }
+                ]
+            }
+        ];
+
+        // Personality Types and Descriptions
+        const personalityTypes = {
+            "ESTJ": {
+                title: "مدیر اجرایی",
+                description: "شما فردی منظم، مسئولیت‌پذیر و عمل‌گرا هستید. دوست دارید مسائل را به سرعت حل کنید و به نتایج ملموس برسید. در کار گروهی عالی عمل می‌کنید و می‌توانید دیگران را هدایت کنید."
+            },
+            "ISTJ": {
+                title: "مفتش",
+                description: "شما فردی دقیق، قابل اعتماد و سنت‌گرا هستید. به قوانین و مسئولیت‌های خود پایبندید و دوست دارید همه چیز سر جای خودش باشد. حافظه‌ای قوی برای جزئیات دارید."
+            },
+            "ESFJ": {
+                title: "مراقب",
+                description: "شما فردی خونگرم، دلسوز و اجتماعی هستید. به نیازهای دیگران توجه زیادی دارید و دوست دارید به آن‌ها کمک کنید. در ایجاد هماهنگی و گرمی در روابط عالی هستید."
+            },
+            "ISFJ": {
+                title: "محافظ",
+                description: "شما فردی مهربان، وفادار و فداکار هستید. به آرامی از دیگران مراقبت می‌کنید و دوست دارید محیطی امن و پایدار ایجاد کنید. به خاطر سپردن جزئیات درباره افراد برایتان مهم است."
+            },
+            "ESTP": {
+                title: "متقاعدکننده",
+                description: "شما فردی پرانرژی، عمل‌گرا و ماجراجو هستید. از چالش‌ها لذت می‌برید و می‌توانید به سرعت در شرایط بحرانی تصمیم بگیرید. زندگی را در لحظه تجربه می‌کنید."
+            },
+            "ISTP": {
+                title: "صنعتگر",
+                description: "شما فردی مستقل، تحلیل‌گر و کنجکاو هستید. دوست دارید چگونگی کارکرد چیزها را بفهمید و مشکلات را به صورت عملی حل کنید. در شرایط بحرانی خونسرد هستید."
+            },
+            "ESFP": {
+                title: "سرگرم‌کننده",
+                description: "شما فردی شاد، اجتماعی و خودجوش هستید. دوست دارید دیگران را سرگرم کنید و از زندگی لذت ببرید. به راحتی با افراد جدید ارتباط برقرار می‌کنید و انعطاف‌پذیر هستید."
+            },
+            "ISFP": {
+                title: "هنرمند",
+                description: "شما فردی آرام، مهربان و حساس هستید. ارزش‌های شخصی برایتان مهم است و دوست دارید دنیا را از طریق هنر و تجربه‌های حسی درک کنید. به دیگران فشار نمی‌آورید و مستقل هستید."
+            },
+            "ENTJ": {
+                title: "فرمانده",
+                description: "شما فردی جسور، مصمم و رهبر هستید. می‌توانید به سرعت نقاط ضعف را تشخیص دهید و راه‌حل ارائه دهید. در سازماندهی و هدایت دیگران مهارت دارید و به چالش‌های بزرگ علاقه دارید."
+            },
+            "INTJ": {
+                title: "معمار",
+                description: "شما فردی استراتژیک، مستقل و نوآور هستید. به الگوها و نظریه‌ها علاقه دارید و می‌توانید برنامه‌های بلندمدت طراحی کنید. به استانداردهای بالایی برای خود و دیگران پایبندید."
+            },
+            "ENTP": {
+                title: "مجادله‌گر",
+                description: "شما فردی باهوش، کنجکاو و ایده‌پرداز هستید. از بحث‌های فکری لذت می‌برید و می‌توانید از زوایای مختلف به مسائل نگاه کنید. انعطاف‌پذیر هستید و به راحتی با شرایط جدید سازگار می‌شوید."
+            },
+            "INTP": {
+                title: "منطق‌گرا",
+                description: "شما فردی تحلیل‌گر، خلاق و مستقل هستید. به دنبال درک قوانین حاکم بر جهان هستید و دوست دارید سیستم‌های پیچیده را تحلیل کنید. برای ایده‌ها و نظریه‌ها ارزش زیادی قائلید."
+            },
+            "ENFJ": {
+                title: "معلم",
+                description: "شما فردی جذاب، الهام‌بخش و همدل هستید. می‌توانید پتانسیل دیگران را ببینید و به آن‌ها کمک کنید رشد کنند. در ایجاد هماهنگی و انگیزه دادن به دیگران مهارت دارید."
+            },
+            "INFJ": {
+                title: "مشاور",
+                description: "شما فردی ایده‌آل‌گرا، خلاق و دلسوز هستید. بینش عمیقی نسبت به مردم و روابط دارید. به دنبال معنا و هدف در زندگی هستید و می‌خواهید به دیگران کمک کنید."
+            },
+            "ENFP": {
+                title: "قهرمان",
+                description: "شما فردی پرانرژی، خلاق و اجتماعی هستید. به احتمالات و ایده‌های جدید علاقه دارید و می‌توانید دیگران را برای پروژه‌ها هیجان‌زده کنید. به راحتی با افراد ارتباط برقرار می‌کنید."
+            },
+            "INFP": {
+                title: "صلح‌طلب",
+                description: "شما فردی ایده‌آل‌گرا، خلاق و دلسوز هستید. به ارزش‌های شخصی خود پایبندید و می‌خواهید دنیا را به جای بهتری تبدیل کنید. به دنبال معنا و اصالت در زندگی هستید."
+            },
+            "MIXED": {
+                title: "ترکیبی منحصر به فرد",
+                description: "شخصیت شما ترکیبی منحصر به فرد از ویژگی‌های مختلف است که شما را به فردی خاص تبدیل می‌کند. ممکن است در موقعیت‌های مختلف، جنبه‌های متفاوتی از شخصیت خود را نشان دهید که این نشان‌دهنده انعطاف‌پذیری و پیچیدگی شخصیت شماست."
+            }
+        };
+
+        // Test State
+        let currentQuestion = 0;
+        const answers = {};
+        const scores = {
+            E: 0, I: 0, S: 0, N: 0, 
+            T: 0, F: 0, J: 0, P: 0
+        };
+
+        // DOM Elements
+        const questionContainer = document.getElementById('question-container');
+        const progressBar = document.getElementById('progress-bar');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const submitBtn = document.getElementById('submit-btn');
+        const testContainer = document.getElementById('test-container');
+        const resultsContainer = document.getElementById('results-container');
+        const resultContent = document.getElementById('result-content');
+
+        // Initialize Test
+        function initTest() {
+            showQuestion(currentQuestion);
+            updateProgressBar();
+            updateButtons();
+        }
+
+        // Show Question
+        function showQuestion(index) {
+            const question = questions[index];
+            
+            let optionsHTML = '';
+            question.options.forEach((option, i) => {
+                optionsHTML += `
+                    <div class="option-item bg-white rounded-lg p-4 cursor-pointer border border-gray-200 mb-3 flex items-center" 
+                         onclick="selectOption(${index}, ${i})" 
+                         id="option-${index}-${i}">
+                        <div class="w-6 h-6 rounded-full border border-gray-300 mr-3 flex-shrink-0 option-radio"></div>
+                        <div>${option.text}</div>
+                    </div>
+                `;
+            });
+            
+            const questionHTML = `
+                <div class="question-card bg-white rounded-xl shadow-md p-6" id="question-${index}">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">سوال ${index + 1} از ${questions.length}</h3>
+                    <p class="text-gray-700 mb-6 text-lg">${question.text}</p>
+                    <div class="options-container">
+                        ${optionsHTML}
+                    </div>
+                </div>
+            `;
+            
+            questionContainer.innerHTML = questionHTML;
+            
+            // Mark selected option if exists
+            if (answers[index] !== undefined) {
+                document.getElementById(`option-${index}-${answers[index]}`).classList.add('bg-indigo-50', 'border-indigo-300');
+                document.querySelector(`#option-${index}-${answers[index]} .option-radio`).classList.add('border-indigo-500', 'bg-indigo-500');
+            }
+        }
+
+        // Select Option
+        function selectOption(questionIndex, optionIndex) {
+            // Reset all options for this question
+            const options = document.querySelectorAll(`#question-${questionIndex} .option-item`);
+            options.forEach(option => {
+                option.classList.remove('bg-indigo-50', 'border-indigo-300');
+                option.querySelector('.option-radio').classList.remove('border-indigo-500', 'bg-indigo-500');
+            });
+            
+            // Mark selected option
+            const selectedOption = document.getElementById(`option-${questionIndex}-${optionIndex}`);
+            selectedOption.classList.add('bg-indigo-50', 'border-indigo-300');
+            selectedOption.querySelector('.option-radio').classList.add('border-indigo-500', 'bg-indigo-500');
+            
+            // Save answer
+            answers[questionIndex] = optionIndex;
+            
+            // Update buttons (enable next if not last question)
+            if (questionIndex === currentQuestion) {
+                if (questionIndex < questions.length - 1) {
+                    nextBtn.disabled = false;
+                } else {
+                    submitBtn.classList.remove('hidden');
+                    nextBtn.classList.add('hidden');
+                }
+            }
+        }
+
+        // Update Progress Bar
+        function updateProgressBar() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // Update Navigation Buttons
+        function updateButtons() {
+            // Previous button
+            if (currentQuestion > 0) {
+                prevBtn.classList.remove('hidden');
+            } else {
+                prevBtn.classList.add('hidden');
+            }
+            
+            // Next button
+            if (currentQuestion < questions.length - 1) {
+                nextBtn.classList.remove('hidden');
+                submitBtn.classList.add('hidden');
+            } else {
+                nextBtn.classList.add('hidden');
+                if (answers[currentQuestion] !== undefined) {
+                    submitBtn.classList.remove('hidden');
+                }
+            }
+        }
+
+        // Next Question
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion(currentQuestion);
+                updateProgressBar();
+                updateButtons();
+            }
+        }
+
+        // Previous Question
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                showQuestion(currentQuestion);
+                updateProgressBar();
+                updateButtons();
+            }
+        }
+
+        // Calculate Results
+        function calculateResults() {
+            // Reset scores
+            for (const key in scores) {
+                scores[key] = 0;
+            }
+            
+            // Calculate scores based on answers
+            for (const questionIndex in answers) {
+                const optionIndex = answers[questionIndex];
+                const score = questions[questionIndex].options[optionIndex].score;
+                
+                if (score.length === 1) {
+                    scores[score]++;
+                } else {
+                    // For multiple letters (like "AB"), split and add to each
+                    score.split('').forEach(s => scores[s]++);
+                }
+            }
+            
+            // Determine personality type
+            let personalityType = '';
+            
+            // E/I
+            personalityType += scores.E >= scores.I ? 'E' : 'I';
+            
+            // S/N (using S for Sensing, N for iNtuition)
+            personalityType += scores.S >= scores.N ? 'S' : 'N';
+            
+            // T/F
+            personalityType += scores.T >= scores.F ? 'T' : 'F';
+            
+            // J/P
+            personalityType += scores.J >= scores.P ? 'J' : 'P';
+            
+            // If mixed results, show mixed type
+            const isMixed = 
+                (Math.abs(scores.E - scores.I) <= 1) || 
+                (Math.abs(scores.S - scores.N) <= 1) || 
+                (Math.abs(scores.T - scores.F) <= 1) || 
+                (Math.abs(scores.J - scores.P) <= 1);
+            
+            return isMixed ? "MIXED" : personalityType;
+        }
+
+        // Show Results
+        function showResults() {
+            const personalityType = calculateResults();
+            const typeInfo = personalityTypes[personalityType];
+            
+            let resultHTML = `
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-indigo-700 mb-2">${typeInfo.title}</h3>
+                    <div class="bg-indigo-50 p-4 rounded-lg text-gray-700 leading-relaxed">
+                        ${typeInfo.description}
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                        <h4 class="font-semibold text-gray-700 mb-3">نقاط قوت</h4>
+                        <ul class="text-gray-600 space-y-2">
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 ml-2"></i>
+                                <span>${getRandomStrength()}</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 ml-2"></i>
+                                <span>${getRandomStrength()}</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check text-green-500 mt-1 ml-2"></i>
+                                <span>${getRandomStrength()}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                        <h4 class="font-semibold text-gray-700 mb-3">پیشنهادهای بهبود</h4>
+                        <ul class="text-gray-600 space-y-2">
+                            <li class="flex items-start">
+                                <i class="fas fa-lightbulb text-yellow-500 mt-1 ml-2"></i>
+                                <span>${getRandomImprovement()}</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-lightbulb text-yellow-500 mt-1 ml-2"></i>
+                                <span>${getRandomImprovement()}</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-lightbulb text-yellow-500 mt-1 ml-2"></i>
+                                <span>${getRandomImprovement()}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="bg-indigo-50 p-4 rounded-lg">
+                    <h4 class="font-semibold text-indigo-700 mb-3">سهمیه‌بندی ویژگی‌های شخصیتی شما</h4>
+                    <div class="space-y-4">
+                        ${createTraitBar("برونگرایی", "درونگرایی", scores.E, scores.I)}
+                        ${createTraitBar("حسی", "شهودی", scores.S, scores.N)}
+                        ${createTraitBar("منطقی", "احساسی", scores.T, scores.F)}
+                        ${createTraitBar("ساختارگرا", "انعطاف‌پذیر", scores.J, scores.P)}
+                    </div>
+                </div>
+            `;
+            
+            resultContent.innerHTML = resultHTML;
+            testContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Helper function to create trait comparison bars
+        function createTraitBar(label1, label2, value1, value2) {
+            const total = value1 + value2;
+            const percent1 = total > 0 ? Math.round((value1 / total) * 100) : 50;
+            const percent2 = 100 - percent1;
+            
+            return `
+                <div>
+                    <div class="flex justify-between mb-1 text-sm">
+                        <span class="font-medium">${label1} ${percent1}%</span>
+                        <span class="font-medium">${label2} ${percent2}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-indigo-600 h-2.5 rounded-full" style="width: ${percent1}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Random strengths for results
+        function getRandomStrength() {
+            const strengths = [
+                "توانایی بالا در حل مسئله",
+                "خلاقیت و نوآوری",
+                "مهارت‌های ارتباطی عالی",
+                "توانایی رهبری و هدایت دیگران",
+                "دقت و توجه به جزئیات",
+                "انعطاف‌پذیری در شرایط مختلف",
+                "همدلی و درک احساسات دیگران",
+                "پشتکار و تعهد بالا",
+                "تفکر استراتژیک و بلندمدت",
+                "توانایی کار تیمی",
+                "خوش‌بین بودن و انرژی مثبت",
+                "توانایی تصمیم‌گیری سریع",
+                "قدرت تحلیل و ارزیابی دقیق",
+                "وفاداری و تعهد به ارزش‌ها"
+            ];
+            return strengths[Math.floor(Math.random() * strengths.length)];
+        }
+
+        // Random improvements for results
+        function getRandomImprovement() {
+            const improvements = [
+                "سعی کنید گاهی از منطقه امن خود خارج شوید",
+                "به احساسات خود بیشتر توجه کنید",
+                "به نظرات دیگران بیشتر گوش دهید",
+                "گاهی اوقات ریسک‌های حساب‌شده انجام دهید",
+                "برای تصمیم‌گیری‌های مهم زمان بیشتری صرف کنید",
+                "سعی کنید انعطاف‌پذیری خود را افزایش دهید",
+                "گاهی اوقات به خودتان استراحت دهید",
+                "روابط اجتماعی خود را گسترش دهید",
+                "برنامه‌ریزی را در اولویت قرار دهید",
+                "به جزئیات بیشتر توجه کنید",
+                "بیشتر در لحظه زندگی کنید",
+                "اهداف بلندمدت برای خود تعیین کنید",
+                "مهارت‌های ارتباطی خود را تقویت کنید",
+                "به دنبال تجربیات جدید باشید"
+            ];
+            return improvements[Math.floor(Math.random() * improvements.length)];
+        }
+
+        // Event Listeners
+        nextBtn.addEventListener('click', nextQuestion);
+        prevBtn.addEventListener('click', prevQuestion);
+        submitBtn.addEventListener('click', showResults);
+
+        // Make functions available globally for HTML onclick
+        window.selectOption = selectOption;
+
+        // Start the test
+        initTest();
+    </script>
+</body>
+</html>
